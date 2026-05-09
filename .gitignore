@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno
+.env
+
+# Sesión de WhatsApp
+.wwebjs_auth/
+
+# Archivos temporales
+uploads/*.png
+*.log
+.DS_Store
+
+# Supabase local (si usas)
+supabase/.temp/

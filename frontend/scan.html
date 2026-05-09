@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔍 Barbería - Escanear Cita</title>
+    <link rel="stylesheet" href="scan.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#22c55e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <!-- Librería para escanear QR -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  </head>
+  <body>
+    <header class="scanner-header">
+      <h1>💈 Escanear Cita</h1>
+      <p>Apunta la cámara al QR del cliente</p>
+      <button id="toggle-camera" class="btn-secondary">
+        🔄 Cambiar cámara
+      </button>
+    </header>
+
+    <main class="scanner-main">
+      <!-- 📷 Área del scanner -->
+      <div id="reader" class="qr-reader"></div>
+
+      <!-- 🎯 Overlay de guía -->
+      <div class="scanner-guide">
+        <div class="guide-frame"></div>
+        <p class="guide-text">Coloca el QR dentro del marco</p>
+      </div>
+
+      <!-- 📋 Resultados -->
+      <div id="scan-result" class="result-panel hidden">
+        <div class="result-header">
+          <span id="result-icon" class="result-icon">⏳</span>
+          <h3 id="result-title">Escaneando...</h3>
+        </div>
+        <div id="result-content" class="result-content">
+          <!-- Se llena dinámicamente -->
+        </div>
+        <div id="result-actions" class="result-actions hidden">
+          <button id="btn-confirm" class="btn-success">
+            ✅ Confirmar Cita
+          </button>
+          <button id="btn-cancel" class="btn-danger">❌ Cancelar</button>
+          <button id="btn-rescan" class="btn-secondary">
+            🔍 Escanear otra
+          </button>
+        </div>
+      </div>
+
+      <!-- 📝 Formulario manual (fallback) -->
+      <details class="manual-entry">
+        <summary>🔤 Ingresar código manualmente</summary>
+        <form id="manual-form">
+          <div class="form-group">
+            <label for="manual-id">ID de la cita (UUID):</label>
+            <input
+              type="text"
+              id="manual-id"
+              placeholder="ej: a1b2c3d4-..."
+              required
+              pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Buscar Cita</button>
+        </form>
+      </details>
+    </main>
+
+    <!-- 🔔 Notificaciones -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- 🎵 Sonido de éxito (opcional) -->
+    <audio
+      id="sound-success"
+      src="audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLHPM8uKCNAoq..."
+      preload="auto"
+    ></audio>
+
+    <script src="scan.js"></script>
+  </body>
+</html>

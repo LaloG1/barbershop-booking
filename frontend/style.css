@@ -1,0 +1,244 @@
+:root {
+  --bg-primary: #121212;
+  --bg-card: #1e1e1e;
+  --bg-input: #2a2a2a;
+  --accent: #d4af37;
+  --accent-hover: #b8972b;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a0;
+  --success: #4ade80;
+  --error: #f87171;
+  --border: #333;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+/* 📅 Banner de horarios */
+.schedule-banner {
+  background: linear-gradient(135deg, var(--bg-card), #252525);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.schedule-banner h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+}
+
+.schedule-banner p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.schedule-banner small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-secondary);
+}
+
+/* 📋 Formulario */
+form {
+  background: var(--bg-card);
+  padding: 1.5rem;
+  border-radius: 12px;
+  max-width: 520px;
+  margin: 0 auto 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+input, select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+input:invalid:not(:placeholder-shown) {
+  border-color: var(--error);
+}
+
+input::placeholder {
+  color: var(--text-secondary);
+}
+
+small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+button {
+  width: 100%;
+  padding: 1rem;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 💬 Mensajes */
+.message {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0 auto 1rem;
+  max-width: 520px;
+  font-weight: 500;
+  display: none;
+}
+
+.message.show {
+  display: block;
+  animation: slideIn 0.3s ease;
+}
+
+.message.success {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.message.error {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🔄 Loader */
+.loading {
+  text-align: center;
+  padding: 1rem;
+  color: var(--text-secondary);
+}
+
+.loading.hidden {
+  display: none;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 📱 Footer */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: auto;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  header h1 { font-size: 1.8rem; }
+  .form-row { grid-template-columns: 1fr; }
+  form { padding: 1.2rem; }
+  body { padding: 15px; }
+}
+
+/* ♿ Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

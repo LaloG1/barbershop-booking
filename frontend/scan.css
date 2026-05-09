@@ -1,0 +1,295 @@
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-card: #1a1a1a;
+  --accent: #22c55e;      /* Verde éxito */
+  --accent-hover: #16a34a;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a0;
+  --border: #333;
+  --scanner-border: #22c55e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 📱 Header */
+.scanner-header {
+  background: var(--bg-card);
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 2px solid var(--accent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.scanner-header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.scanner-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+/* 📷 Scanner Area */
+.scanner-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.qr-reader {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  position: relative;
+}
+
+.qr-reader video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 🎯 Guía de escaneo */
+.scanner-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.guide-frame {
+  width: 200px;
+  height: 200px;
+  border: 3px solid var(--scanner-border);
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5), 0 0 20px var(--scanner-border);
+  animation: pulse 2s infinite;
+}
+
+.guide-text {
+  margin-top: 0.8rem;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* 📋 Panel de resultados */
+.result-panel {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.2rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--border);
+  animation: slideUp 0.3s ease;
+}
+
+.result-panel.hidden { display: none; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-icon {
+  font-size: 1.8rem;
+}
+
+.result-header h3 {
+  font-size: 1.2rem;
+}
+
+.result-content {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.result-content strong {
+  color: var(--accent);
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.result-actions.hidden { display: none; }
+
+/* 🎨 Botones */
+.btn-primary, .btn-success, .btn-danger {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  flex: 1;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-success {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-success:hover { background: var(--accent-hover); }
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover { opacity: 0.9; }
+
+/* 📝 Formulario manual */
+.manual-entry {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+}
+
+.manual-entry summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  padding: 0.3rem 0;
+}
+
+.manual-entry summary:hover {
+  color: var(--text-primary);
+}
+
+.manual-entry .form-group {
+  margin: 1rem 0;
+}
+
+.manual-entry label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.manual-entry input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.manual-entry input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* 🔔 Toast notifications */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 100;
+  animation: slideIn 0.3s ease;
+}
+
+.toast.hidden { display: none; }
+.toast.error { border-left-color: var(--danger); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 📱 Responsive */
+@media (max-width: 480px) {
+  .scanner-header h1 { font-size: 1.3rem; }
+  .guide-frame { width: 180px; height: 180px; }
+  .result-actions { flex-direction: column; }
+  .btn-primary, .btn-success, .btn-danger { width: 100%; }
+}
+
+/* ♿ Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
