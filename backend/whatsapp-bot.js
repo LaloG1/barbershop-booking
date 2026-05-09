@@ -7,7 +7,7 @@ require("dotenv").config();
 // ─── Configuración del cliente WhatsApp ─────────────────────────────────────
 const SESSION_NAME = process.env.WHATSAPP_SESSION_NAME || "barbershop_bot";
 
-const client = new Client({
+/* const client = new Client({
   authStrategy: new LocalAuth({ clientId: SESSION_NAME }),
   puppeteer: {
     headless: true,
@@ -23,6 +23,26 @@ const client = new Client({
       "--disable-software-rasterizer",
     ],
     executablePath: process.env.CHROME_PATH || undefined,
+  },
+}); */
+
+const client = new Client({
+  authStrategy: new LocalAuth({ clientId: SESSION_NAME }),
+  puppeteer: {
+    headless: true,
+    // 👈 Usa la ruta de Render, o fallback a undefined para local
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--single-process",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+    ],
   },
 });
 
