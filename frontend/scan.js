@@ -1,298 +1,298 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // 🎯 Elementos del DOM
-  const readerElement = document.getElementById('reader');
-  const resultPanel = document.getElementById('scan-result');
-  const resultIcon = document.getElementById('result-icon');
-  const resultTitle = document.getElementById('result-title');
-  const resultContent = document.getElementById('result-content');
-  const resultActions = document.getElementById('result-actions');
-  const btnConfirm = document.getElementById('btn-confirm');
-  const btnCancel = document.getElementById('btn-cancel');
-  const btnRescan = document.getElementById('btn-rescan');
-  const toast = document.getElementById('toast');
-  const soundSuccess = document.getElementById('sound-success');
-  const toggleCameraBtn = document.getElementById('toggle-camera');
-  const manualForm = document.getElementById('manual-form');
+document.addEventListener('DOMContentLoaded', function() {
+  // Elementos del DOM
+  var resultPanel = document.getElementById('scan-result');
+  var resultIcon = document.getElementById('result-icon');
+  var resultTitle = document.getElementById('result-title');
+  var resultContent = document.getElementById('result-content');
+  var resultActions = document.getElementById('result-actions');
+  var toast = document.getElementById('toast');
+  var manualForm = document.getElementById('manual-form');
+  var readerElement = document.getElementById('reader');
 
-  // 📦 Estado
-  let html5QrCode = null;
-  let currentAppointmentId = null;
-  let cameraFacingMode = 'environment'; // 'environment' = trasera, 'user' = frontal
+  // Estado global
+  var html5QrCode = null;
+  var currentAppointmentId = null;
+  var currentAppointment = null;
+  var isProcessing = false;
 
-  // 🔊 Reproducir sonido de éxito
-  function playSuccessSound() {
-    try {
-      soundSuccess.currentTime = 0;
-      soundSuccess.play().catch(() => {}); // Ignorar errores de autoplay
-    } catch (e) {}
+  // 🔔 Mostrar notificación
+  function showToast(message, type) {
+    if (!type) type = 'success';
+    toast.textContent = message;
+    toast.className = 'toast ' + (type === 'error' ? 'error' : '');
+    toast.classList.remove('hidden');
+    setTimeout(function() { toast.classList.add('hidden'); }, 4000);
   }
 
-  // 🔔 Mostrar notificación toast
-  function showToast(message, type = 'success') {
-    toast.textContent = message;
-    toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-    toast.classList.remove('hidden');
+  // 🎨 Mostrar panel de resultado
+  function showScanResult(status, title, html) {
+    var icons = { loading: '⏳', success: '✅', error: '❌', info: '📋' };
+    resultIcon.textContent = icons[status] || '❓';
+    resultTitle.textContent = title;
+    resultContent.innerHTML = html;
+    resultPanel.classList.remove('hidden');
+    resultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // 📋 Mostrar detalles de la cita
+  function showAppointmentDetails(app) {
+    var statusText = { confirmed: '🟡 Confirmada', completed: '✅ Realizada', cancelled: '🔴 Cancelada' };
+    var dateParts = app.appointment_date.split('-');
+    var formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+
+    var html = '';
+    html += '<p><strong>👤 Cliente:</strong> ' + app.name + '</p>';
+    html += '<p><strong>📅 Fecha:</strong> ' + formattedDate + '</p>';
+    html += '<p><strong>⏰ Hora:</strong> ' + app.appointment_time + '</p>';
+    html += '<p><strong>✂️ Corte:</strong> ' + app.haircut_type + '</p>';
+    html += '<p><strong>🎫 Estado:</strong> ' + (statusText[app.status] || app.status) + '</p>';
+
+    if (app.status === 'completed') {
+      showScanResult('success', '✅ YA REALIZADA', html);
+      resultActions.innerHTML = '<button id="btn-next" class="btn-secondary" style="width:100%">🔄 Siguiente</button>';
+      resultActions.classList.remove('hidden');
+      document.getElementById('btn-next').onclick = resetScanner;
+    } else if (app.status === 'cancelled') {
+      showScanResult('error', '❌ CANCELADA', html);
+      resultActions.innerHTML = '<button id="btn-next" class="btn-secondary" style="width:100%">🔄 Siguiente</button>';
+      resultActions.classList.remove('hidden');
+      document.getElementById('btn-next').onclick = resetScanner;
+    } else {
+      // 🟡 Confirmada: mostrar botón para completar
+      showScanResult('info', '📋 Cita Encontrada', html);
+      resultActions.innerHTML = '<button id="btn-complete" class="btn-success" style="width:100%">✅ Marcar como Realizada</button>';
+      resultActions.classList.remove('hidden');
+      document.getElementById('btn-complete').onclick = completeAppointment;
+    }
+  }
+
+  // ✅ Escanear QR exitosamente
+  async function onScanSuccess(decodedText) {
+    if (isProcessing) return;
     
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 4000);
+    console.log('🎯 QR escaneado:', decodedText.substring(0, 100));
+    
+    // Pausar scanner para evitar lecturas múltiples
+    if (html5QrCode && html5QrCode.pause) {
+      await html5QrCode.pause();
+    }
+
+    // Extraer UUID del contenido del QR
+    var uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+    var match = decodedText.match(uuidPattern);
+    
+    if (!match) {
+      showToast('❌ QR no contiene un ID válido', 'error');
+      return;
+    }
+    
+    currentAppointmentId = match[0].toLowerCase().trim();
+    console.log('🔑 ID extraído:', currentAppointmentId);
+    
+    // Mostrar estado de carga
+    showScanResult('loading', 'Buscando cita...', '⏳ Conectando con base de datos...');
+    
+    try {
+      // Consultar al backend
+      var response = await fetch('/api/appointments/' + currentAppointmentId);
+      var responseData = await response.json();
+      
+      console.log('📦 Respuesta del servidor:', responseData);
+      
+      if (!response.ok || responseData.error || !responseData.appointment) {
+        throw new Error(responseData.error || 'Cita no encontrada en la base de datos');
+      }
+      
+      // Guardar y mostrar detalles
+      currentAppointment = responseData.appointment;
+      showAppointmentDetails(currentAppointment);
+      
+    } catch (error) {
+      console.error('❌ Error al buscar cita:', error.message);
+      showScanResult('error', '❌ Error', 
+        '<p><strong>Mensaje:</strong> ' + error.message + '</p>' +
+        '<p><strong>ID buscado:</strong> <code>' + currentAppointmentId + '</code></p>' +
+        '<p style="margin-top:1rem"><small>Verifica que:</small></p>' +
+        '<ul style="text-align:left;font-size:0.9rem"><li>La cita exista en Supabase</li><li>El servidor esté corriendo</li><li>RLS esté desactivado en la tabla</li></ul>'
+      );
+    }
+  }
+
+  // ❌ Error al escanear (ignorar silenciosamente)
+  function onScanFailure(errorMessage) {
+    // No hacer nada: los errores de "no QR detectado" son normales durante el escaneo continuo
+  }
+
+  // ✅ Completar cita (cambiar estado a "completed")
+  async function completeAppointment() {
+    if (!currentAppointmentId || isProcessing) return;
+    
+    isProcessing = true;
+    var btn = document.getElementById('btn-complete');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Procesando...';
+    }
+
+    try {
+      console.log('🔄 Actualizando cita:', currentAppointmentId);
+      
+      var response = await fetch('/api/appointments/' + currentAppointmentId + '/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          barberId: 'web-scanner', 
+          notes: 'Completada desde página web del barbero',
+          completedAt: new Date().toISOString()
+        })
+      });
+      
+      var result = await response.json();
+      console.log('📦 Respuesta de completar:', result);
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al actualizar el estado de la cita');
+      }
+
+      // 🎉 Éxito: mostrar pantalla de confirmación PERMANENTE
+      showToast('✅ Cita marcada como realizada', 'success');
+      
+      var dateParts = currentAppointment.appointment_date.split('-');
+      var formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+      
+      var successHtml = '';
+      successHtml += '<div style="text-align:center;padding:1.5rem">';
+      successHtml += '<p style="font-size:4rem;margin:0;line-height:1">✅</p>';
+      successHtml += '<p style="font-size:1.3rem;font-weight:bold;margin:0.8rem 0">' + currentAppointment.name + '</p>';
+      successHtml += '<p><strong>📅</strong> ' + formattedDate + ' | <strong>⏰</strong> ' + currentAppointment.appointment_time + '</p>';
+      successHtml += '<p><strong>✂️</strong> ' + currentAppointment.haircut_type + '</p>';
+      successHtml += '<p style="color:#22c55e;font-size:1.5rem;font-weight:bold;margin:1.5rem 0;text-transform:uppercase">✅ Completada</p>';
+      successHtml += '<p style="font-size:0.9rem;color:#888">' + new Date(result.appointment.completed_at).toLocaleString('es-MX') + '</p>';
+      successHtml += '</div>';
+      
+      resultIcon.textContent = '✅';
+      resultTitle.textContent = '¡CITA REALIZADA!';
+      resultTitle.style.color = '#22c55e';
+      resultContent.innerHTML = successHtml;
+      
+      resultActions.innerHTML = '<button id="btn-next" class="btn-success" style="width:100%;padding:1rem;font-size:1.1rem">🔄 Escanear Siguiente Cita</button>';
+      resultActions.classList.remove('hidden');
+      document.getElementById('btn-next').onclick = resetScanner;
+
+    } catch (error) {
+      console.error('❌ Error al completar cita:', error);
+      showToast('❌ ' + error.message, 'error');
+      
+      // Restaurar botón
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '✅ Marcar como Realizada';
+      }
+      isProcessing = false;
+    }
+  }
+
+  // 🔄 Resetear para nueva lectura
+  function resetScanner() {
+    console.log('🔄 Resetear scanner');
+    currentAppointmentId = null;
+    currentAppointment = null;
+    isProcessing = false;
+    resultPanel.classList.add('hidden');
+    resultActions.classList.add('hidden');
+    
+    // Reanudar scanner si está pausado
+    if (html5QrCode && html5QrCode.resume) {
+      html5QrCode.resume().catch(function() {
+        // Si falla, reiniciar completamente
+        initScanner();
+      });
+    }
   }
 
   // 🔄 Inicializar scanner QR
   async function initScanner() {
     // Limpiar scanner anterior si existe
     if (html5QrCode) {
-      await html5QrCode.stop().catch(() => {});
-      html5QrCode.clear();
+      try {
+        await html5QrCode.stop();
+        html5QrCode.clear();
+      } catch(e) {}
     }
 
     // Crear nueva instancia
     html5QrCode = new Html5Qrcode('reader');
     
-    const config = {
+    var config = {
       fps: 10,
       qrbox: { width: 200, height: 200 },
-      disableFlip: false,
       rememberLastUsedCamera: true
     };
 
     try {
       await html5QrCode.start(
-        { facingMode: cameraFacingMode },
+        { facingMode: 'environment' }, // Cámara trasera por defecto
         config,
         onScanSuccess,
         onScanFailure
       );
-      console.log('📷 Scanner iniciado con cámara:', cameraFacingMode);
+      console.log('📷 Scanner iniciado');
     } catch (err) {
-      console.error('❌ Error iniciando scanner:', err);
-      showToast('No se pudo acceder a la cámara. Verifica los permisos.', 'error');
-      
-      // Mostrar formulario manual como fallback
+      console.error('❌ Error al iniciar scanner:', err);
+      showToast('❌ No se pudo acceder a la cámara. Usa el formulario manual.', 'error');
       document.querySelector('.manual-entry').open = true;
     }
   }
 
-  // ✅ Callback: QR escaneado exitosamente
-  async function onScanSuccess(decodedText, decodedResult) {
-    console.log('🎯 QR escaneado:', decodedText);
+  // 📝 Manejar formulario manual
+  manualForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    // Pausar scanner temporalmente para procesar
-    await html5QrCode.pause();
+    var idInput = document.getElementById('manual-id');
+    var id = idInput.value.trim().toLowerCase();
     
-    // Extraer ID de la cita del contenido del QR
-    // Formato esperado: "CITA BARBERÍA\n👤 Nombre\n📅 Fecha ⏰ Hora\n✂️ Corte\n🆔 UUID"
-    const appointmentId = extractAppointmentId(decodedText);
-    
-    if (!appointmentId) {
-      showToast('❌ QR no válido para citas', 'error');
-      await resumeScanner();
+    if (!id) {
+      showToast('Ingresa un ID válido', 'error');
       return;
     }
-
-    // Mostrar resultado del escaneo
-    showScanResult('loading', 'Verificando cita...', decodedText);
+    
+    // Validar formato UUID básico
+    var uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidPattern.test(id)) {
+      showToast('Formato inválido. Ej: a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx', 'error');
+      return;
+    }
+    
+    currentAppointmentId = id;
+    showScanResult('loading', 'Buscando...', '🔍 ID: ' + id);
     
     try {
-      // Verificar la cita en el backend
-      const response = await fetch(`/api/appointments/${appointmentId}`);
-      const {  appointment, error } = await response.json();
+      var res = await fetch('/api/appointments/' + id);
+      var data = await res.json();
       
-      if (error || !appointment) {
-        throw new Error('Cita no encontrada');
-      }
-
-      // Mostrar detalles de la cita
-      showAppointmentDetails(appointment);
-      
-    } catch (err) {
-      console.error('Error verificando cita:', err);
-      showScanResult('error', 'Cita no encontrada', `ID: ${appointmentId}`);
-    }
-  }
-
-  // ❌ Callback: Error al escanear (ignoramos errores menores)
-  function onScanFailure(errorMessage) {
-    // No hacer nada: los errores de "no QR detectado" son normales
-    // console.debug('🔍 Escaneando...', errorMessage);
-  }
-
-  // 🔍 Extraer UUID del contenido del QR
-  function extractAppointmentId(qrContent) {
-    // Buscar patrón de UUID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-    const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-    const match = qrContent.match(uuidPattern);
-    return match ? match[0] : null;
-  }
-
-  // 📋 Mostrar detalles de la cita escaneada
-  function showAppointmentDetails(appointment) {
-    currentAppointmentId = appointment.id;
-    
-    const formatDate = (dateStr) => {
-      const [y, m, d] = dateStr.split('-');
-      return `${d}/${m}/${y}`;
-    };
-
-    const statusBadges = {
-      'confirmed': '🟡 Confirmada',
-      'completed': '🟢 Realizada',
-      'cancelled': '🔴 Cancelada',
-      'no-show': '⚪ No se presentó'
-    };
-
-    const content = `
-      <p><strong>👤 Cliente:</strong> ${appointment.name}</p>
-      <p><strong>📅 Fecha:</strong> ${formatDate(appointment.appointment_date)}</p>
-      <p><strong>⏰ Hora:</strong> ${appointment.appointment_time}</p>
-      <p><strong>✂️ Corte:</strong> ${appointment.haircut_type}</p>
-      <p><strong>📱 Teléfono:</strong> ${appointment.phone}</p>
-      <p><strong>🎫 Estado:</strong> ${statusBadges[appointment.status] || appointment.status}</p>
-    `;
-
-    if (appointment.status === 'completed') {
-      showScanResult('success', '✅ Cita ya realizada', content);
-      resultActions.classList.add('hidden');
-    } else if (appointment.status === 'cancelled') {
-      showScanResult('error', '❌ Cita cancelada', content);
-      resultActions.classList.add('hidden');
-    } else {
-      showScanResult('info', '📋 Cita encontrada', content);
-      resultActions.classList.remove('hidden');
-      btnConfirm.disabled = false;
-      btnConfirm.textContent = '✅ Marcar como Realizada';
-    }
-  }
-
-  // 🎨 Mostrar panel de resultado con estado
-  function showScanResult(status, title, contentHtml) {
-    // Iconos por estado
-    const icons = {
-      loading: '⏳',
-      success: '✅',
-      error: '❌',
-      info: '📋'
-    };
-
-    resultIcon.textContent = icons[status] || '❓';
-    resultTitle.textContent = title;
-    resultContent.innerHTML = contentHtml;
-    resultPanel.classList.remove('hidden');
-    
-    // Scroll suave al resultado
-    resultPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  // 🔄 Reanudar scanner
-  async function resumeScanner() {
-    try {
-      await html5QrCode.resume();
-    } catch (e) {
-      console.warn('No se pudo reanudar scanner, reiniciando...');
-      await initScanner();
-    }
-  }
-
-  // 🎯 Confirmar cita como realizada
-  async function confirmAppointment() {
-    if (!currentAppointmentId) return;
-    
-    btnConfirm.disabled = true;
-    btnConfirm.textContent = 'Procesando...';
-    
-    try {
-      const response = await fetch(`/api/appointments/${currentAppointmentId}/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          barberId: 'barber-1', // 👈 Cambiar por sistema de auth real
-          notes: 'Escaneado desde página de scanner'
-        })
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Error al actualizar');
-      }
-
-      // ✅ Éxito
-      playSuccessSound();
-      showToast('✅ Cita marcada como realizada', 'success');
-      
-      showScanResult('success', '✅ ¡Listo!', `
-        <p><strong>${result.appointment.name}</strong></p>
-        <p>Cita completada a las ${new Date(result.appointment.completed_at).toLocaleTimeString('es-MX')}</p>
-      `);
-      
-      resultActions.classList.add('hidden');
-      
-      // Auto-limpiar después de 3 segundos
-      setTimeout(() => {
-        resetScanner();
-      }, 3000);
-
-    } catch (err) {
-      console.error('Error confirmando cita:', err);
-      showToast(`❌ ${err.message}`, 'error');
-      btnConfirm.disabled = false;
-      btnConfirm.textContent = '✅ Confirmar Cita';
-    }
-  }
-
-  // 🔄 Resetear scanner para nueva lectura
-  function resetScanner() {
-    currentAppointmentId = null;
-    resultPanel.classList.add('hidden');
-    resultActions.classList.add('hidden');
-    resumeScanner();
-  }
-
-  // 📝 Manejar entrada manual de ID
-  manualForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('manual-id').value.trim();
-    
-    if (!id) return;
-    
-    showScanResult('loading', 'Buscando...', `ID: ${id}`);
-    
-    try {
-      const response = await fetch(`/api/appointments/${id}`);
-      const {  appointment, error } = await response.json();
-      
-      if (error || !appointment) {
-        throw new Error('Cita no encontrada');
+      if (!res.ok || data.error || !data.appointment) {
+        throw new Error(data.error || 'Cita no encontrada');
       }
       
-      showAppointmentDetails(appointment);
-      document.getElementById('manual-id').value = '';
+      currentAppointment = data.appointment;
+      showAppointmentDetails(currentAppointment);
+      idInput.value = ''; // Limpiar input
       
     } catch (err) {
-      showToast(`❌ ${err.message}`, 'error');
-      showScanResult('error', 'No encontrada', `ID: ${id}`);
+      console.error('Error manual search:', err);
+      showToast('❌ ' + err.message, 'error');
+      showScanResult('error', 'No encontrada', '<code>' + id + '</code>');
     }
   });
 
-  // 🔄 Cambiar entre cámaras frontal/trasera
-  toggleCameraBtn.addEventListener('click', async () => {
-    cameraFacingMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
-    showToast(`🔄 Cambiando a cámara ${cameraFacingMode === 'environment' ? 'trasera' : 'frontal'}...`);
-    await initScanner();
-  });
-
-  // 🎯 Event listeners de botones
-  btnConfirm.addEventListener('click', confirmAppointment);
-  btnCancel.addEventListener('click', resetScanner);
-  btnRescan.addEventListener('click', resetScanner);
-
-  // 🚀 Iniciar scanner al cargar
+  // 🚀 Iniciar al cargar la página
+  console.log('🚀 Iniciando página del barbero...');
   initScanner();
 
-  // 🧹 Limpieza al salir de la página
-  window.addEventListener('beforeunload', async () => {
-    if (html5QrCode) {
-      await html5QrCode.stop().catch(() => {});
+  // 🧹 Limpiar al salir
+  window.addEventListener('beforeunload', function() {
+    if (html5QrCode && html5QrCode.stop) {
+      html5QrCode.stop().catch(function(){});
     }
   });
 });

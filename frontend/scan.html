@@ -54,23 +54,28 @@
         </div>
       </div>
 
-      <!-- 📝 Formulario manual (fallback) -->
-      <details class="manual-entry">
-        <summary>🔤 Ingresar código manualmente</summary>
-        <form id="manual-form">
-          <div class="form-group">
-            <label for="manual-id">ID de la cita (UUID):</label>
-            <input
-              type="text"
-              id="manual-id"
-              placeholder="ej: a1b2c3d4-..."
-              required
-              pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-            />
-          </div>
-          <button type="submit" class="btn-primary">Buscar Cita</button>
-        </form>
-      </details>
+      <!-- 📝 Formulario manual (fallback) - REEMPLAZA EL EXISTENTE -->
+<details class="manual-entry">
+  <summary>🔤 Ingresar código manualmente</summary>
+  <form id="manual-form">
+    <div class="form-group">
+      <label for="manual-id">ID de la cita:</label>
+      <input 
+        type="text" 
+        id="manual-id" 
+        placeholder="ej: a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+        required 
+        pattern="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        title="Formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        style="font-family: monospace; text-transform: lowercase;"
+      />
+      <small style="color: var(--text-secondary);">
+        Copia el ID desde Supabase o del QR
+      </small>
+    </div>
+    <button type="submit" class="btn-primary">Buscar Cita</button>
+  </form>
+</details>
     </main>
 
     <!-- 🔔 Notificaciones -->

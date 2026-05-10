@@ -156,40 +156,45 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
-// ─── Endpoint: Verificar estado de una cita por ID ──────────────────────────
+// ─── Endpoint: Verificar cita por ID ────────────────────────────────────────
 app.get('/api/appointments/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(`🔍 [GET] Buscando cita: ${id}`);
     
-    const {  appointment, error } = await supabase
+    const { data: appointment, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('id', id)
       .single();
 
     if (error || !appointment) {
+      console.warn('⚠️ Cita no encontrada:', error?.message || 'null data');
       return res.status(404).json({ error: 'Cita no encontrada' });
     }
 
+    console.log('✅ Cita encontrada:', appointment.name);
     res.json({ success: true, appointment });
+    
   } catch (err) {
-    console.error('❌ Error verificando cita:', err.message);
-    res.status(500).json({ error: 'Error verificando la cita' });
+    console.error('❌ Error en GET /api/appointments/:id:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-// ─── Endpoint: Escanear QR y marcar cita como realizada (Barbero) ───────────
+
+// ─── Endpoint: Completar cita (cambiar estado a "completed") ────────────────
 app.post('/api/appointments/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
     const { barberId, notes } = req.body;
+    
+    console.log(`🔄 [POST] Completando cita: ${id}`);
 
-    console.log(`🔍 [Scan] Actualizando cita ${id} a "completed"...`);
-
-    // 1️⃣ Verificar que la cita existe y está confirmada
-    const {  existing, error: fetchError } = await supabase
+    // 1. Verificar que la cita existe y está confirmada
+    const { data: existing, error: fetchError } = await supabase
       .from('appointments')
-      .select('id, status, name, appointment_date, appointment_time, phone')
+      .select('id, status, name')
       .eq('id', id)
       .single();
 
@@ -198,23 +203,16 @@ app.post('/api/appointments/:id/complete', async (req, res) => {
     }
 
     if (existing.status === 'completed') {
-      return res.status(400).json({ 
-        error: 'Esta cita ya fue marcada como realizada',
-        appointment: existing 
-      });
+      return res.status(400).json({ error: 'Esta cita ya está marcada como realizada' });
     }
 
-    if (existing.status === 'cancelled') {
-      return res.status(400).json({ error: 'No se puede completar una cita cancelada' });
-    }
-
-    // 2️⃣ Actualizar estado a "completed"
-    const {  updated, error: updateError } = await supabase
+    // 2. Actualizar estado
+    const { data: updated, error: updateError } = await supabase
       .from('appointments')
       .update({ 
         status: 'completed',
         completed_at: new Date().toISOString(),
-        completed_by: barberId || null,
+        completed_by: barberId || 'web-scanner',
         completion_notes: notes || null
       })
       .eq('id', id)
@@ -222,32 +220,14 @@ app.post('/api/appointments/:id/complete', async (req, res) => {
       .single();
 
     if (updateError) {
-      console.error('❌ Error actualizando estado:', updateError);
-      return res.status(500).json({ error: 'Error actualizando la cita' });
+      console.error('❌ Error actualizando:', updateError);
+      return res.status(500).json({ error: 'Error al actualizar la cita' });
     }
 
-    console.log(`✅ Cita ${id} marcada como completada para: ${existing.name}`);
-
-    // 3️⃣ (Opcional) Enviar WhatsApp de confirmación al cliente
-    // Descomenta si quieres notificar al cliente que su cita fue completada
-    /*
-    const whatsappDoneMsg = `✅ *¡Tu cita ha sido completada!* 💈
-
-👤 *Nombre:* ${existing.name}
-📅 *Fecha:* ${existing.appointment_date}
-⏰ *Hora:* ${existing.appointment_time}
-
-¡Gracias por visitarnos! Esperamos verte pronto. ✂️✨`;
-    
-    sendConfirmationMessage(existing.phone, whatsappDoneMsg, null)
-      .then(() => console.log(`✅ WhatsApp de confirmación enviado a ${existing.phone}`))
-      .catch(err => console.error(`❌ Error enviando WhatsApp: ${err.message}`));
-    */
-
-    // 4️⃣ Respuesta exitosa
+    console.log('✅ Cita completada:', updated.name);
     res.json({
       success: true,
-      message: `✅ Cita de ${existing.name} marcada como realizada`,
+      message: 'Cita marcada como realizada',
       appointment: {
         id: updated.id,
         name: updated.name,
@@ -256,12 +236,9 @@ app.post('/api/appointments/:id/complete', async (req, res) => {
       }
     });
 
-  } catch (error) {
-    console.error('🔥 Error en /api/appointments/:id/complete:', error.message);
-    res.status(500).json({ 
-      error: 'Error interno del servidor',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+  } catch (err) {
+    console.error('❌ Error en POST /complete:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
