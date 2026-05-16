@@ -22,65 +22,51 @@
 
       <!-- 📋 Formulario de reserva -->
       <form id="booking-form" novalidate>
-        <div class="form-group">
-          <label for="name">👤 Nombre completo</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            required
-            placeholder="Ej: Juan Pérez García"
-            pattern="^[A-Za-zÁ-Úá-úÑñ\s]{3,50}$"
-            title="Solo letras y espacios (3-50 caracteres)"
-          />
-        </div>
+  <div class="form-group">
+    <label for="name">👤 Nombre completo</label>
+    <input type="text" id="name" required placeholder="Ej: Juan Pérez" pattern="^[A-Za-zÁ-Úá-úÑñ\s]{3,50}$" />
+  </div>
 
-        <div class="form-group">
-          <label for="phone">📱 Teléfono (con código de país)</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            required
-            placeholder="Ej: +5215512345678"
-            pattern="^\+?[0-9\s\-]{10,15}$"
-            title="Incluye código de país. Ej: +52 para México"
-          />
-          <small>Formato internacional: +[código país][número]</small>
-        </div>
+  <!-- 🌍 Selector de país -->
+  <div class="form-group">
+    <label>🌍 Código de país</label>
+    <div class="country-selector">
+      <label class="radio-label">
+        <input type="radio" name="country" value="mx" checked />
+        <span>🇲🇽 México (+521)</span>
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="country" value="us" />
+        <span>🇺🇸 EE.UU. (+1)</span>
+      </label>
+    </div>
+  </div>
 
-        <div class="form-group">
-          <label for="haircut">✂️ Tipo de corte</label>
-          <select id="haircut" name="haircut" required>
-            <option value="" disabled selected>Selecciona una opción</option>
-            <option value="Pelon">Pelon</option>
-            <option value="normal">Normal</option>
-            <option value="militar">Militar</option>
-          </select>
-        </div>
+  <!-- 📱 Teléfono con prefijo fijo -->
+  <div class="form-group">
+    <label for="phone">📱 Número de teléfono</label>
+    <div class="phone-input-wrapper">
+      <span id="phone-prefix">+521</span>
+      <input type="tel" id="phone" required placeholder="5512345678" maxlength="10" inputmode="numeric" />
+    </div>
+    <small>Solo números, sin espacios ni guiones</small>
+  </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="date">📅 Fecha</label>
-            <input type="date" id="date" name="date" required />
-          </div>
-          <div class="form-group">
-            <label for="time">⏰ Hora</label>
-            <input
-              type="time"
-              id="time"
-              name="time"
-              required
-              min="10:00"
-              max="18:00"
-              step="1800"
-              title="Horario disponible: 10:00 AM - 6:00 PM"
-            />
-          </div>
-        </div>
+  <!-- ⚠️ ELIMINADO: El <select> de tipo de corte ya no existe aquí -->
 
-        <button type="submit" id="submit-btn">✨ Agendar Cita</button>
-      </form>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="date">📅 Fecha</label>
+      <input type="date" id="date" required />
+    </div>
+    <div class="form-group">
+      <label for="time">⏰ Hora</label>
+      <input type="time" id="time" required min="10:00" max="18:00" step="1800" />
+    </div>
+  </div>
+
+  <button type="submit" id="submit-btn">✨ Agendar Cita</button>
+</form>
 
       <!-- 💬 Mensajes de estado -->
       <div
