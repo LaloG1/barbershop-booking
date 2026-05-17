@@ -22,51 +22,81 @@
 
       <!-- 📋 Formulario de reserva -->
       <form id="booking-form" novalidate>
-  <div class="form-group">
-    <label for="name">👤 Nombre completo</label>
-    <input type="text" id="name" required placeholder="Ej: Juan Pérez" pattern="^[A-Za-zÁ-Úá-úÑñ\s]{3,50}$" />
-  </div>
+        <!-- 📍 Selector de Sucursal (Carga dinámica desde API) -->
+<div class="form-group">
+  <label for="branch">📍 Sucursal</label>
+  <select id="branch" name="branch" required class="form-select" disabled>
+    <option value="">Cargando sucursales...</option>
+  </select>
+  <small style="color: var(--text-secondary);">Selecciona donde te atenderás</small>
+  <span id="branch-error" style="color: var(--danger); font-size: 0.85rem; display: none;"></span>
+</div>
 
-  <!-- 🌍 Selector de país -->
-  <div class="form-group">
-    <label>🌍 Código de país</label>
-    <div class="country-selector">
-      <label class="radio-label">
-        <input type="radio" name="country" value="mx" checked />
-        <span>🇲🇽 México (+521)</span>
-      </label>
-      <label class="radio-label">
-        <input type="radio" name="country" value="us" />
-        <span>🇺🇸 EE.UU. (+1)</span>
-      </label>
-    </div>
-  </div>
+        <div class="form-group">
+          <label for="name">👤 Nombre completo</label>
+          <input
+            type="text"
+            id="name"
+            required
+            placeholder="Ej: Juan Pérez"
+            pattern="^[A-Za-zÁ-Úá-úÑñ\s]{3,50}$"
+          />
+        </div>
 
-  <!-- 📱 Teléfono con prefijo fijo -->
-  <div class="form-group">
-    <label for="phone">📱 Número de teléfono</label>
-    <div class="phone-input-wrapper">
-      <span id="phone-prefix">+521</span>
-      <input type="tel" id="phone" required placeholder="5512345678" maxlength="10" inputmode="numeric" />
-    </div>
-    <small>Solo números, sin espacios ni guiones</small>
-  </div>
+        <!-- 🌍 Selector de país -->
+        <div class="form-group">
+          <label>🌍 Código de país</label>
+          <div class="country-selector">
+            <label class="radio-label">
+              <input type="radio" name="country" value="mx" checked />
+              <span>🇲🇽 México (+521)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="country" value="us" />
+              <span>🇺🇸 EE.UU. (+1)</span>
+            </label>
+          </div>
+        </div>
 
-  <!-- ⚠️ ELIMINADO: El <select> de tipo de corte ya no existe aquí -->
+        <!-- 📱 Teléfono con prefijo fijo -->
+        <div class="form-group">
+          <label for="phone">📱 Número de teléfono</label>
+          <div class="phone-input-wrapper">
+            <span id="phone-prefix">+521</span>
+            <input
+              type="tel"
+              id="phone"
+              required
+              placeholder="5512345678"
+              maxlength="10"
+              inputmode="numeric"
+            />
+          </div>
+          <small>Solo números, sin espacios ni guiones</small>
+        </div>
 
-  <div class="form-row">
-    <div class="form-group">
-      <label for="date">📅 Fecha</label>
-      <input type="date" id="date" required />
-    </div>
-    <div class="form-group">
-      <label for="time">⏰ Hora</label>
-      <input type="time" id="time" required min="10:00" max="18:00" step="1800" />
-    </div>
-  </div>
+        <!-- ⚠️ ELIMINADO: El <select> de tipo de corte ya no existe aquí -->
 
-  <button type="submit" id="submit-btn">✨ Agendar Cita</button>
-</form>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date">📅 Fecha</label>
+            <input type="date" id="date" required />
+          </div>
+          <div class="form-group">
+            <label for="time">⏰ Hora</label>
+            <input
+              type="time"
+              id="time"
+              required
+              min="10:00"
+              max="18:00"
+              step="1800"
+            />
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn">✨ Agendar Cita</button>
+      </form>
 
       <!-- 💬 Mensajes de estado -->
       <div

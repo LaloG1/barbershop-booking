@@ -293,3 +293,45 @@ footer {
   padding: 0.8rem;
 }
 #phone:focus { outline: none; box-shadow: none; }
+
+/* 📍 Selector de sucursal */
+.form-select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-input, #1a1a1a);
+  color: var(--text-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+.form-select:invalid {
+  color: var(--text-secondary);
+}
+
+.form-select option {
+  background: var(--bg-card, #1e1e1e);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+  .form-select {
+    font-size: 16px; /* Evita zoom en iOS */
+  }
+}
