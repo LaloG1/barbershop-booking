@@ -129,27 +129,33 @@ app.post("/api/appointments", async (req, res) => {
       `📌 *Presenta el QR adjunto al llegar.*\n` +
       `¡Te esperamos! ✂️✨`;
 
-    // 🚀 Enviar WhatsApp
-    sendConfirmationMessage(phone, msg, qrPath)
-      .then(() => console.log(`✅ WhatsApp enviado a ${phone}`))
-      .catch((err) => console.error(`❌ WhatsApp error: ${err.message}`));
-    sendConfirmationMessage(phone, msg, qrPath).catch((err) =>
-      console.error("❌ WhatsApp:", err.message),
-    );
+    // 🚀 Enviar WhatsApp EN BACKGROUND (sin await)
+    // La cita ya se guardó, WhatsApp es opcional: no bloqueamos la respuesta
+    console.log("📱 [Background] Iniciando envío de WhatsApp...");
 
-    // ✅ Responder
+    sendConfirmationMessage(phone, msg, qrPath)
+      .then(() => {
+        console.log(`✅ [Background] WhatsApp enviado a ${phone}`);
+      })
+      .catch((err) => {
+        console.error(`❌ [Background] WhatsApp falló: ${err.message}`);
+        // No propagamos el error: el frontend ya recibió éxito
+      });
+
+    // ✅ Responder INMEDIATAMENTE al frontend (sin esperar WhatsApp)
     res.json({
       success: true,
-      message: "Cita agendada",
-      appointment: { id: appointment.id, name: appointment.name, date, time },
+      message: "Cita agendada correctamente",
+      appointment: {
+        id: appointment.id,
+        name: appointment.name,
+        date: appointment.appointment_date,
+        time: appointment.appointment_time,
+      },
     });
-  } catch (error) {
-    console.error("🔥 CATCH GLOBAL:", {
-      message: error.message,
-      stack: error.stack?.split("\n")[0],
-      name: error.name,
-    });
-    res.status(500).json({ error: "Error interno", debug: error.message });
+  } catch (err) {
+    console.error("❌ Error en POST /api/appointments:", err.message);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
