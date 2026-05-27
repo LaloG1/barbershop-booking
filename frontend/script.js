@@ -12,10 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const branchSelect = document.getElementById("branch");
 
-  // 🔽 Cargar sucursales desde API
   // 🔽 Cargar sucursales desde API y poblar el select
   async function loadBranches() {
-    const branchSelect = document.getElementById("branch");
     const branchError = document.getElementById("branch-error");
 
     try {
@@ -61,6 +59,88 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadBranches(); // Cargar al iniciar
+
+  branchSelect?.addEventListener("change", (e) => {
+    const selectedBranchId = e.target.value;
+    console.log(
+      "🔄 Sucursal cambiada, recargando barberos...",
+      selectedBranchId,
+    );
+
+    // Recargar barberos filtrados por la sucursal seleccionada
+    if (selectedBranchId) {
+      loadBarbers(selectedBranchId);
+    } else {
+      loadBarbers(null); // Cargar todos si no hay sucursal seleccionada
+    }
+  });
+
+  // 🔽 Cargar barberos desde API y poblar el select
+  // 🔽 Variable para controlar la última carga
+  let lastBarberLoad = { branchId: null, timestamp: 0 };
+
+  async function loadBarbers(branchId = null) {
+    // 🚫 Evitar recargar si es la misma sucursal en menos de 500ms (debounce)
+    const now = Date.now();
+    if (
+      branchId === lastBarberLoad.branchId &&
+      now - lastBarberLoad.timestamp < 500
+    ) {
+      console.log("⏭️ Skip loadBarbers (debounce):", branchId);
+      return;
+    }
+    lastBarberLoad = { branchId, timestamp: now };
+
+    const barberSelect = document.getElementById("barber");
+    const barberError = document.getElementById("barber-error");
+
+    try {
+      console.log("🌐 Cargando barberos desde /api/barbers...", { branchId });
+
+      // Construir URL con filtro opcional por sucursal
+      const url = branchId
+        ? `/api/barbers?branch_id=${encodeURIComponent(branchId)}`
+        : "/api/barbers";
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const json = await res.json();
+      console.log("📦 Respuesta barbers:", json);
+
+      if (!json.success) {
+        throw new Error(json.error || "Error al cargar barberos");
+      }
+
+      // Limpiar y habilitar select
+      barberSelect.innerHTML =
+        '<option value="">Cualquier barbero disponible</option>';
+      barberSelect.disabled = false;
+
+      // Poblar opciones con datos reales de Supabase
+      json.barbers.forEach((b) => {
+        const opt = document.createElement("option");
+        opt.value = b.id; // 👈 UUID real de Supabase
+        opt.textContent = `✂️ ${b.name}${b.specialty ? " - " + b.specialty : ""}`;
+        barberSelect.appendChild(opt);
+      });
+
+      console.log(`✅ Barberos cargados: ${json.barbers.length}`);
+    } catch (err) {
+      console.error("❌ Error cargando barberos:", err.message);
+
+      // Mostrar error al usuario
+      barberSelect.innerHTML = '<option value="">Error al cargar</option>';
+      barberSelect.disabled = true;
+
+      if (barberError) {
+        barberError.textContent = "⚠️ No se pudieron cargar los barberos";
+        barberError.style.display = "block";
+      }
+    }
+  }
+
+  loadBarbers(); // Carga todos los barberos inicialmente
 
   // 🌍 Cambiar prefijo según país
   countryRadios.forEach((radio) => {
@@ -117,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔑 Concatenar prefijo + número limpio
     const fullPhone = phonePrefix.textContent + phoneInput.value.trim();
-    const branchSelect = document.getElementById("branch");
+    const barberSelect = document.getElementById("barber"); // 👈 Nuevo
 
     // 🔑 Validar que se seleccionó una sucursal válida
     if (!branchSelect.value || branchSelect.disabled) {
@@ -128,12 +208,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return; // ⚠️ Detener envío
     }
 
+    // barber_id es opcional: si no se selecciona, se envía null
+    const selectedBarberId = barberSelect.value || null;
+
     const formData = {
       name: document.getElementById("name").value.trim(),
       phone: fullPhone,
       date: document.getElementById("date").value,
       time: document.getElementById("time").value,
-      branch_id: branchSelect.value, // 👈 Incluir branch_id
+      branch_id: branchSelect.value,
+      barber_id: selectedBarberId, // 👈 Opcional (puede ser null) // 👈 Incluir branch_id
     };
 
     try {

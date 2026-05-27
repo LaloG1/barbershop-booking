@@ -22,16 +22,6 @@
 
       <!-- 📋 Formulario de reserva -->
       <form id="booking-form" novalidate>
-        <!-- 📍 Selector de Sucursal (Carga dinámica desde API) -->
-<div class="form-group">
-  <label for="branch">📍 Sucursal</label>
-  <select id="branch" name="branch" required class="form-select" disabled>
-    <option value="">Cargando sucursales...</option>
-  </select>
-  <small style="color: var(--text-secondary);">Selecciona donde te atenderás</small>
-  <span id="branch-error" style="color: var(--danger); font-size: 0.85rem; display: none;"></span>
-</div>
-
         <div class="form-group">
           <label for="name">👤 Nombre completo</label>
           <input
@@ -41,6 +31,60 @@
             placeholder="Ej: Juan Pérez"
             pattern="^[A-Za-zÁ-Úá-úÑñ\s]{3,50}$"
           />
+        </div>
+
+        <!-- 📍 Selector de Sucursal (Carga dinámica desde API) -->
+        <div class="form-group">
+          <label for="branch">📍 Sucursal</label>
+          <select
+            id="branch"
+            name="branch"
+            required
+            class="form-select"
+            disabled
+          >
+            <option value="">Cargando sucursales...</option>
+          </select>
+          <small style="color: var(--text-secondary)"
+            >Selecciona donde te atenderás</small
+          >
+          <span
+            id="branch-error"
+            style="color: var(--danger); font-size: 0.85rem; display: none"
+          ></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date">📅 Fecha</label>
+            <input type="date" id="date" required />
+          </div>
+          <div class="form-group">
+            <label for="time">⏰ Hora</label>
+            <input
+              type="time"
+              id="time"
+              required
+              min="10:00"
+              max="18:00"
+              step="1800"
+            />
+          </div>
+        </div>
+
+        <!-- ✂️ Selector de Barbero (NUEVO) -->
+        <div class="form-group">
+          <label for="barber">✂️ Barbero (opcional)</label>
+          <select id="barber" name="barber" class="form-select" disabled>
+            <option value="">Cargando barberos...</option>
+          </select>
+          <small style="color: var(--text-secondary)"
+            >Déjalo en blanco para cualquiera disponible</small
+          >
+          <span
+            id="barber-error"
+            style="color: var(--danger); font-size: 0.85rem; display: none"
+          ></span>
         </div>
 
         <!-- 🌍 Selector de país -->
@@ -73,26 +117,6 @@
             />
           </div>
           <small>Solo números, sin espacios ni guiones</small>
-        </div>
-
-        <!-- ⚠️ ELIMINADO: El <select> de tipo de corte ya no existe aquí -->
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="date">📅 Fecha</label>
-            <input type="date" id="date" required />
-          </div>
-          <div class="form-group">
-            <label for="time">⏰ Hora</label>
-            <input
-              type="time"
-              id="time"
-              required
-              min="10:00"
-              max="18:00"
-              step="1800"
-            />
-          </div>
         </div>
 
         <button type="submit" id="submit-btn">✨ Agendar Cita</button>
