@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>✂️ Escanear Citas - Barbero</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body class="barber-body">
+  <header class="barber-header">
+    <div class="user-info">
+      <span class="user-avatar">✂️</span>
+      <div>
+        <strong id="user-name">Cargando...</strong>
+        <small id="user-branch" class="text-muted">Cargando sucursal...</small>
+      </div>
+    </div>
+    <button id="logout-btn" class="btn-outline">🚪 Salir</button>
+  </header>
+
+  <main class="barber-main">
+    <section class="shift-status">
+      <h2>📋 Turno Actual</h2>
+      <div class="shift-stats">
+        <div class="stat-card"><span class="stat-number" id="today-count">0</span><span class="stat-label">Citas hoy</span></div>
+        <div class="stat-card"><span class="stat-number" id="today-total">$0</span><span class="stat-label">Total cobrado</span></div>
+      </div>
+    </section>
+
+    <section class="scanner-section">
+      <h2>🔍 Escanear Código QR de Cita</h2>
+      <div id="qr-reader" style="max-width:400px;margin:0 auto;"></div>
+      <p class="hint">Apunta la cámara al QR del cliente o ingresa el código manualmente</p>
+      <div class="manual-input">
+        <input type="text" id="manual-code" placeholder="Código de cita (ej: a1b2c3d4)" maxlength="8" />
+        <button id="search-btn" class="btn-secondary">🔎 Buscar</button>
+      </div>
+    </section>
+
+    <section id="scan-result" class="result-section" style="display:none;">
+      <h3>✅ Cita Encontrada</h3>
+      <div class="appointment-card">
+        <p><strong>👤 Cliente:</strong> <span id="apt-name"></span></p>
+        <p><strong>📅 Fecha:</strong> <span id="apt-date"></span></p>
+        <p><strong>⏰ Hora:</strong> <span id="apt-time"></span></p>
+        <p><strong>📍 Sucursal:</strong> <span id="apt-branch"></span></p>
+        <div class="action-buttons">
+          <button id="complete-btn" class="btn-success">✅ Marcar como Realizada</button>
+          <button id="cancel-scan-btn" class="btn-outline">🔄 Nuevo Escaneo</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="recent-section">
+      <h3>🕐 Citas Recientes (Hoy)</h3>
+      <div id="recent-list" class="recent-list"><p class="text-muted">Cargando historial...</p></div>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

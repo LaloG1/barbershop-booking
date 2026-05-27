@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>👨‍💼 Admin Dashboard - Barbería</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <h1>👨‍💼 Panel de Administración</h1>
+    <div class="user-menu"><span id="admin-name">Cargando...</span><button id="logout-btn" class="btn-outline">🚪 Salir</button></div>
+  </header>
+  <main class="admin-main">
+    <nav class="admin-tabs">
+      <button class="tab-btn active" data-tab="users">👥 Usuarios</button>
+      <button class="tab-btn" data-tab="branches">📍 Sucursales</button>
+      <button class="tab-btn" data-tab="services">✂️ Servicios</button>
+    </nav>
+    
+    <section id="tab-users" class="tab-content active">
+      <div class="tab-header"><h2>👥 Gestionar Usuarios</h2><button id="new-user-btn" class="btn-primary">➕ Nuevo Usuario</button></div>
+      
+      <!-- Modal Formulario -->
+      <div id="user-form-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+          <h3 id="form-title">➕ Nuevo Usuario</h3>
+          <form id="user-form">
+            <input type="hidden" id="edit-user-id" />
+            <div class="form-row">
+              <div class="form-group"><label>👤 Nombre *</label><input type="text" id="form-name" required /></div>
+              <div class="form-group"><label>📧 Email *</label><input type="email" id="form-email" required /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>🔑 Contraseña <small>(déjalo vacío para no cambiar)</small></label><input type="password" id="form-password" placeholder="••••••••" /></div>
+              <div class="form-group"><label>🎭 Rol *</label><select id="form-role" required><option value="barber">✂️ Barbero</option><option value="admin">👨‍💼 Admin</option></select></div>
+            </div>
+            <div id="barber-fields" class="form-row" style="display:none;">
+              <div class="form-group"><label>✂️ Especialidad</label><input type="text" id="form-specialty" placeholder="Ej: Cortes clásicos" /></div>
+              <div class="form-group"><label>📍 Sucursal</label><select id="form-branch"><option value="">Sin asignar</option></select></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="cancel-form" class="btn-outline">Cancelar</button>
+              <button type="submit" class="btn-success">💾 Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Tabla Usuarios -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Sucursal</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="users-table-body"><tr><td colspan="6" class="text-center">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    
+    <section id="tab-branches" class="tab-content"><h2>📍 Sucursales</h2><p class="text-muted">Próximamente</p></section>
+    <section id="tab-services" class="tab-content"><h2>✂️ Servicios</h2><p class="text-muted">Próximamente</p></section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
