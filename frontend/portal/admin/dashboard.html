@@ -1,64 +1,538 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>👨‍💼 Admin Dashboard - Barbería</title>
-  <link rel="stylesheet" href="../style.css" />
-</head>
-<body class="admin-body">
-  <header class="admin-header">
-    <h1>👨‍💼 Panel de Administración</h1>
-    <div class="user-menu"><span id="admin-name">Cargando...</span><button id="logout-btn" class="btn-outline">🚪 Salir</button></div>
-  </header>
-  <main class="admin-main">
-    <nav class="admin-tabs">
-      <button class="tab-btn active" data-tab="users">👥 Usuarios</button>
-      <button class="tab-btn" data-tab="branches">📍 Sucursales</button>
-      <button class="tab-btn" data-tab="services">✂️ Servicios</button>
-    </nav>
-    
-    <section id="tab-users" class="tab-content active">
-      <div class="tab-header"><h2>👥 Gestionar Usuarios</h2><button id="new-user-btn" class="btn-primary">➕ Nuevo Usuario</button></div>
-      
-      <!-- Modal Formulario -->
-      <div id="user-form-modal" class="modal" style="display:none;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>👨‍💼 Admin Dashboard - Barbería</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=swap"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- AdminLTE CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../style.css" />
+
+    <style>
+      /* Ajustes personalizados para Barbería */
+      /* En el <style> del dashboard.html */
+      :root {
+        --brand-primary: #d4af37; /* Dorado */
+        --brand-dark: #16213e; /* Azul oscuro */
+        --brand-darker: #1a1a2e; /* Casi negro */
+      }
+
+      /* Luego usa estas variables */
+      .main-sidebar {
+        background: var(--brand-dark) !important;
+      }
+      .nav-sidebar > .nav-item > .nav-link.active {
+        background: var(--brand-primary) !important;
+      }
+      .brand-link {
+        background: #1a1a2e !important;
+      }
+      .main-sidebar {
+        background: #16213e !important;
+      }
+      .nav-sidebar > .nav-item > .nav-link.active {
+        background: #d4af37 !important;
+        color: #1a1a2e !important;
+      }
+      .nav-sidebar > .nav-item > .nav-link:hover {
+        background: rgba(212, 175, 55, 0.1) !important;
+      }
+      .content-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+      .card-primary {
+        background: linear-gradient(135deg, #16213e, #1a1a2e);
+        border: none;
+      }
+      .btn-gold {
+        background: #d4af37;
+        color: #1a1a2e;
+        border: none;
+        font-weight: 600;
+      }
+      .btn-gold:hover {
+        background: #b89628;
+        color: #fff;
+      }
+      .badge-admin {
+        background: #6c757d;
+      }
+      .badge-barber {
+        background: #17a2b8;
+      }
+      .badge-success {
+        background: #28a745;
+      }
+      .badge-danger {
+        background: #dc3545;
+      }
+      .table-hover tbody tr:hover {
+        background: rgba(212, 175, 55, 0.05);
+      }
+      /* Modal personalizado */
+      .modal-content {
+        border-radius: 10px;
+        border: none;
+      }
+      .modal-header {
+        background: #16213e;
+        color: #fff;
+        border-radius: 10px 10px 0 0;
+      }
+      .form-control:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+      }
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar-mini.sidebar-collapse .main-sidebar {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+      <!-- Navbar Superior -->
+      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"
+              ><i class="fas fa-bars"></i
+            ></a>
+          </li>
+          <li class="nav-item d-none d-sm-inline-block">
+            <span class="navbar-text text-muted">
+              👋 <strong id="admin-name">Cargando...</strong> |
+              <small class="text-muted" id="admin-email"
+                >admin@barbershop.local</small
+              >
+            </span>
+          </li>
+        </ul>
+
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <button id="logout-btn" class="btn btn-outline-danger btn-sm">
+              <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.navbar -->
+
+      <!-- Sidebar Principal -->
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+          <span class="brand-text font-weight-light">💈 BarberAdmin</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <!-- Sidebar Menu -->
+          <nav class="mt-2">
+            <ul
+              class="nav nav-pills nav-sidebar flex-column"
+              data-widget="treeview"
+              role="menu"
+            >
+              <!-- Dashboard -->
+              <li class="nav-item">
+                <a href="#" class="nav-link active" data-tab="dashboard">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+
+              <!-- Usuarios -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" data-tab="users">
+                  <i class="nav-icon fas fa-users"></i>
+                  <p>Usuarios</p>
+                </a>
+              </li>
+
+              <!-- Sucursales -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" data-tab="branches">
+                  <i class="nav-icon fas fa-map-marker-alt"></i>
+                  <p>Sucursales</p>
+                </a>
+              </li>
+
+              <!-- Servicios -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" data-tab="services">
+                  <i class="nav-icon fas fa-cut"></i>
+                  <p>Servicios</p>
+                </a>
+              </li>
+
+              <!-- Reportes -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" data-tab="reports">
+                  <i class="nav-icon fas fa-chart-bar"></i>
+                  <p>Reportes</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+      </aside>
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1 class="m-0" id="page-title">📊 Dashboard</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="#">Home</a></li>
+                  <li class="breadcrumb-item active" id="breadcrumb-active">
+                    Dashboard
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="container-fluid">
+            <!-- 🔹 TAB: Dashboard (Resumen) -->
+            <div id="tab-dashboard" class="tab-content active">
+              <div class="row">
+                <!-- Stats Cards -->
+                <div class="col-lg-3 col-6">
+                  <div class="small-box bg-info">
+                    <div class="inner">
+                      <h3 id="stat-users">0</h3>
+                      <p>Usuarios Totales</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <a href="#" class="small-box-footer" data-tab="users"
+                      >Ver más <i class="fas fa-arrow-circle-right"></i
+                    ></a>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                  <div class="small-box bg-success">
+                    <div class="inner">
+                      <h3 id="stat-branches">0</h3>
+                      <p>Sucursales Activas</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-store"></i></div>
+                    <a href="#" class="small-box-footer" data-tab="branches"
+                      >Ver más <i class="fas fa-arrow-circle-right"></i
+                    ></a>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                  <div class="small-box bg-warning">
+                    <div class="inner">
+                      <h3 id="stat-appointments">0</h3>
+                      <p>Citas Hoy</p>
+                    </div>
+                    <div class="icon">
+                      <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <a href="#" class="small-box-footer"
+                      >Ver más <i class="fas fa-arrow-circle-right"></i
+                    ></a>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                  <div class="small-box bg-danger">
+                    <div class="inner">
+                      <h3 id="stat-revenue">$0</h3>
+                      <p>Ingresos Hoy</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                    <a href="#" class="small-box-footer" data-tab="reports"
+                      >Ver más <i class="fas fa-arrow-circle-right"></i
+                    ></a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Activity -->
+              <div class="card">
+                <div class="card-header border-0">
+                  <h3 class="card-title">🕐 Actividad Reciente</h3>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled">
+                    <li class="p-2 border-bottom">
+                      <strong>👤 Nuevo usuario registrado</strong>
+                      <p class="text-muted mb-0 small">Hace 5 minutos</p>
+                    </li>
+                    <li class="p-2 border-bottom">
+                      <strong>✂️ Cita completada - Carlos Méndez</strong>
+                      <p class="text-muted mb-0 small">Hace 15 minutos</p>
+                    </li>
+                    <li class="p-2">
+                      <strong>📍 Sucursal "Norte" actualizada</strong>
+                      <p class="text-muted mb-0 small">Hace 1 hora</p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🔹 TAB: Usuarios -->
+            <div id="tab-users" class="tab-content" style="display: none">
+              <div class="card">
+                <div
+                  class="card-header d-flex justify-content-between align-items-center"
+                >
+                  <h3 class="card-title mb-0">👥 Gestionar Usuarios</h3>
+                  <button id="new-user-btn" class="btn btn-gold btn-sm">
+                    <i class="fas fa-plus"></i> Nuevo Usuario
+                  </button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                      <thead class="thead-dark">
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Email</th>
+                          <th>Rol</th>
+                          <th>Sucursal</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="users-table-body">
+                        <tr>
+                          <td colspan="6" class="text-center text-muted py-4">
+                            Cargando usuarios...
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🔹 TAB: Sucursales (Placeholder) -->
+            <div id="tab-branches" class="tab-content" style="display: none">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">📍 Sucursales</h3>
+                </div>
+                <div class="card-body text-center py-5">
+                  <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                  <h5>Gestión de Sucursales</h5>
+                  <p class="text-muted">
+                    Próximamente: CRUD completo de sucursales
+                  </p>
+                  <button class="btn btn-outline-secondary" disabled>
+                    En desarrollo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🔹 TAB: Servicios (Placeholder) -->
+            <div id="tab-services" class="tab-content" style="display: none">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">✂️ Servicios</h3>
+                </div>
+                <div class="card-body text-center py-5">
+                  <i class="fas fa-cut fa-3x text-muted mb-3"></i>
+                  <h5>Catálogo de Servicios</h5>
+                  <p class="text-muted">
+                    Próximamente: Gestión de servicios y precios
+                  </p>
+                  <button class="btn btn-outline-secondary" disabled>
+                    En desarrollo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 🔹 TAB: Reportes (Placeholder) -->
+            <div id="tab-reports" class="tab-content" style="display: none">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">📊 Reportes</h3>
+                </div>
+                <div class="card-body text-center py-5">
+                  <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                  <h5>Estadísticas y Métricas</h5>
+                  <p class="text-muted">
+                    Próximamente: Reportes por fecha, barbero y sucursal
+                  </p>
+                  <button class="btn btn-outline-secondary" disabled>
+                    En desarrollo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Footer -->
+      <footer class="main-footer">
+        <strong>💈 BarberBook Admin</strong>
+        <span class="float-right d-none d-sm-inline"><b>Versión</b> 1.0.0</span>
+      </footer>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- Modal: Nuevo/Editar Usuario -->
+    <div
+      class="modal fade"
+      id="userModal"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-          <h3 id="form-title">➕ Nuevo Usuario</h3>
+          <div class="modal-header">
+            <h5 class="modal-title" id="form-title">➕ Nuevo Usuario</h5>
+            <button
+              type="button"
+              class="close text-white"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
           <form id="user-form">
-            <input type="hidden" id="edit-user-id" />
-            <div class="form-row">
-              <div class="form-group"><label>👤 Nombre *</label><input type="text" id="form-name" required /></div>
-              <div class="form-group"><label>📧 Email *</label><input type="email" id="form-email" required /></div>
+            <div class="modal-body">
+              <input type="hidden" id="edit-user-id" />
+
+              <div class="form-group">
+                <label>👤 Nombre completo *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="form-name"
+                  required
+                  placeholder="Ej: Carlos Méndez"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>📧 Correo electrónico *</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="form-email"
+                  required
+                  placeholder="ejemplo@barbershop.local"
+                />
+              </div>
+
+              <div class="form-group">
+                <label
+                  >🔑 Contraseña
+                  <small class="text-muted"
+                    >(déjalo vacío para no cambiar)</small
+                  ></label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="form-password"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>🎭 Rol *</label>
+                <select class="form-control" id="form-role" required>
+                  <option value="barber">✂️ Barbero</option>
+                  <option value="admin">👨‍💼 Administrador</option>
+                </select>
+              </div>
+
+              <!-- Campos específicos para barberos -->
+              <div id="barber-fields" style="display: none">
+                <div class="form-group">
+                  <label>✂️ Especialidad</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="form-specialty"
+                    placeholder="Ej: Cortes clásicos, Barbas"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>📍 Sucursal asignada</label>
+                  <select class="form-control" id="form-branch">
+                    <option value="">Sin asignar</option>
+                    <!-- Se llenará dinámicamente -->
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="form-row">
-              <div class="form-group"><label>🔑 Contraseña <small>(déjalo vacío para no cambiar)</small></label><input type="password" id="form-password" placeholder="••••••••" /></div>
-              <div class="form-group"><label>🎭 Rol *</label><select id="form-role" required><option value="barber">✂️ Barbero</option><option value="admin">👨‍💼 Admin</option></select></div>
-            </div>
-            <div id="barber-fields" class="form-row" style="display:none;">
-              <div class="form-group"><label>✂️ Especialidad</label><input type="text" id="form-specialty" placeholder="Ej: Cortes clásicos" /></div>
-              <div class="form-group"><label>📍 Sucursal</label><select id="form-branch"><option value="">Sin asignar</option></select></div>
-            </div>
-            <div class="form-actions">
-              <button type="button" id="cancel-form" class="btn-outline">Cancelar</button>
-              <button type="submit" class="btn-success">💾 Guardar</button>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+                id="cancel-form"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-gold">
+                💾 Guardar Usuario
+              </button>
             </div>
           </form>
         </div>
       </div>
-      
-      <!-- Tabla Usuarios -->
-      <div class="table-container">
-        <table class="data-table">
-          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Sucursal</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="users-table-body"><tr><td colspan="6" class="text-center">Cargando...</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-    
-    <section id="tab-branches" class="tab-content"><h2>📍 Sucursales</h2><p class="text-muted">Próximamente</p></section>
-    <section id="tab-services" class="tab-content"><h2>✂️ Servicios</h2><p class="text-muted">Próximamente</p></section>
-  </main>
-  <script src="script.js"></script>
-</body>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+    <!-- Custom Script -->
+    <script src="script.js"></script>
+  </body>
 </html>
